@@ -1,7 +1,7 @@
 import React from "react";
 // import { BackgroundLines } from "@/components/ui/background-lines";
-// import MicrophoneVisualizer from "@/widgets/MicrophoneVisualizer";
-import { Microphone } from "@/widgets/Butt";
+import MicrophoneVisualizer from "@/widgets/MicrophoneVisualizer";
+// import { Microphone } from "@/widgets/Butt";
 export default function app() {
   return (
     // <BackgroundLines className="flex items-center justify-center w-full flex-col px-4">
@@ -15,8 +15,8 @@ export default function app() {
     // </BackgroundLines>
 
     <div>
-      {/* <MicrophoneVisualizer /> */}
-      <Microphone />
+      <MicrophoneVisualizer />
+      {/* <Microphone /> */}
     </div>
   );
 }
