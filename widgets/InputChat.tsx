@@ -10,25 +10,62 @@ import { Button } from "@/components/ui/button";
 import { ArrowUp, Paperclip, Square, X, Mic } from "lucide-react";
 import { useRef, useState } from "react";
 import { MicPopup } from "./MicPopup";
+import { useChat } from "./chat/sharedContext";
 
 export function InputChat() {
+  const { addMessage, isLoading, setIsLoading } = useChat();
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isMicOpen, setIsMicOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (input.trim() || files.length > 0) {
+      // Add user message to chat
+      addMessage({
+        role: "user",
+        content: input.trim(),
+      });
+
       setIsLoading(true);
-      setTimeout(() => {
+
+      try {
+        // Send request to API
+        const response = await fetch(`http://localhost:4000/api/llm/invoke2`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            input,
+          }),
+        });
+
+        const json = await response.json();
+
+        // Add AI response to chat
+        if (json?.markdown) {
+          addMessage({
+            role: "assistant",
+            content: json.markdown,
+          });
+        }
+      } catch (error) {
+        console.error("Error calling AI API:", error);
+        // Optionally add an error message to the chat
+        addMessage({
+          role: "assistant",
+          content:
+            "Sorry, I encountered an error while processing your request.",
+        });
+      } finally {
         setIsLoading(false);
         setInput("");
         setFiles([]);
-      }, 2000);
+      }
     }
   };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files);
@@ -49,7 +86,7 @@ export function InputChat() {
       onValueChange={setInput}
       isLoading={isLoading}
       onSubmit={handleSubmit}
-      className="w-full max-w-[350px]"
+      className="w-full max-w-[full]"
     >
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2 pb-2">
